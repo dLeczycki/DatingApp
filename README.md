@@ -1,5 +1,5 @@
 This project is an example of .NET Core and Angular integration. 
-In .Net Core I built Back-end REST API which responses HTTP requests from Front-end Angular app.
+In .Net Core I've built Back-end REST API which responses HTTP requests from Front-end Angular app.
 
 This project includes:
   - Registration and Login with use of Tokens
