@@ -10,5 +10,6 @@ This project includes:
   - Action Filters
   - Sorting, Filtering and Pagination of data
   - Usage of cloud and photo update with CLoudinary
-  and much more..
+ 
+ and much more..
   
