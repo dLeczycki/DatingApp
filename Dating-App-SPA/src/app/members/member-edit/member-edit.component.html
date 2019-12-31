@@ -1,15 +1,15 @@
-<h1 class="container mt-4">
-  <h1 class="row">
-    <h1 class="col-sm-4">
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-sm-4">
       <h1>Your profile</h1>
-    </h1>
+    </div>
     <div class="col-sm-8">
       <div *ngIf="editForm.dirty" class="alert alert-info">
         <strong>Information:</strong> You have made changes. Any unsaved changes
         will be lost!
       </div>
     </div>
-  </h1>
+  </div>
   <div class="row">
     <div class="col-sm-4">
       <div class="card">
@@ -26,7 +26,7 @@
           </div>
           <div>
             <strong>Last Active:</strong>
-            <p>{{ user.lastActive | timeAgo }}</p>
+            <p>{{ user.lastActive | timeAgo}}</p>
           </div>
           <div>
             <strong>Member since:</strong>
@@ -69,4 +69,4 @@
       </div>
     </div>
   </div>
-</h1>
+</div>
