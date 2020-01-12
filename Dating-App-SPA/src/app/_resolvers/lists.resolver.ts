@@ -9,7 +9,7 @@ import { catchError } from 'rxjs/operators';
 @Injectable()
 export class ListResolver implements Resolve<User[]> {
     pageNumber = 1;
-    pageSize = 5;
+    pageSize = 12;
     likesParam = 'Likers';
 
     constructor(

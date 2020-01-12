@@ -1,12 +1,11 @@
 <div class="container mt-4">
   <div class="row">
     <div class="col-sm-4">
-      <h1>Your profile</h1>
+      <h1>Twój profil</h1>
     </div>
     <div class="col-sm-8">
       <div *ngIf="editForm.dirty" class="alert alert-info">
-        <strong>Information:</strong> You have made changes. Any unsaved changes
-        will be lost!
+        <strong>Ostrzeżenie:</strong> Dokonałeś zmian. Wszystkie niezapisane zmiany zostaną utracone!
       </div>
     </div>
   </div>
@@ -17,25 +16,25 @@
           alt="{{ user.knownAs }}" />
         <div class="card-body">
           <div>
-            <strong>Location:</strong>
+            <strong>Lokalizacja:</strong>
             <p>{{ user.city }}, {{ user.country }}</p>
           </div>
           <div>
-            <strong>Age:</strong>
+            <strong>Wiek:</strong>
             <p>{{ user.age }}</p>
           </div>
           <div>
-            <strong>Last Active:</strong>
+            <strong>Ostatnio aktywny:</strong>
             <p>{{ user.lastActive | timeAgo}}</p>
           </div>
           <div>
-            <strong>Member since:</strong>
-            <p>{{ user.created | date: 'mediumDate' }}</p>
+            <strong>Członek Finders od:</strong>
+            <p>{{ user.created | date: 'd.MM.yyyy' }}</p>
           </div>
         </div>
         <div class="card-footer">
           <button [disabled]="!editForm.dirty" form="editForm" class="btn btn-success btn-block">
-            Save Changes
+            Zapisz zmiany
           </button>
         </div>
       </div>
@@ -43,27 +42,285 @@
     <div class="col-sm-8">
       <div class="tab-panel">
         <tabset class="member-tabset">
-          <tab heading="Edit Profile">
+          <tab heading="Zmień Profil">
             <form #editForm="ngForm" id="editForm" (ngSubmit)="updateUser()">
-              <h4>Description</h4>
+              <h4>Opis</h4>
               <textarea name="introduction" rows="6" class="form-control" [(ngModel)]="user.introduction"></textarea>
-              <h4>Looking For</h4>
+              <h4 class="mt-3">Szukam</h4>
               <textarea name="lookingFor" rows="6" class="form-control" [(ngModel)]="user.lookingFor"></textarea>
-              <h4>Interests</h4>
+              <h4 class="mt-3">Zainteresowania</h4>
               <textarea name="interests" rows="6" class="form-control" [(ngModel)]="user.interests"></textarea>
-              <h4>Location Details:</h4>
+              <h4 class="mt-3">Lokalizacja:</h4>
               <div class="form-inline">
-                <label for="city">City</label>
+                <label for="city">Miasto</label>
                 <input type="text" name="city" class="form-control" [(ngModel)]="user.city" />
 
-                <label for="city">Country</label>
+                <label class="ml-2" for="city">Województwo</label>
                 <input type="text" name="country" class="form-control" [(ngModel)]="user.country" />
               </div>
             </form>
           </tab>
-          <tab heading="Edit Photos">
+          <tab heading="Zmień Zdjęcia">
             <app-photo-editor [photos]="user.photos" (getMemberPhotoChange)="updateMainPhoto($event)">
             </app-photo-editor>
+          </tab>
+          <tab heading="Edytuj Preferencje">
+            <form #preferencesForm="ngForm" id="preferencesForm" (ngSubmit)="updatePreferences()">
+              <div>
+                <h4>Wygląd na zdjęciu</h4>
+                <div class="col mt-2">
+                  <p class="property">Zarost: </p>
+                  <div class="btn-group">
+                    <button type="button" name="facialHair" class="btn btn-primary" [(ngModel)]="preferences.facialHair"
+                      btnRadio="0">Brak</button>
+                    <button type="button" name="facialHair" class="btn btn-primary" [(ngModel)]="preferences.facialHair"
+                      btnRadio="0.5">Lekki</button>
+                    <button type="button" name="facialHair" class="btn btn-primary" [(ngModel)]="preferences.facialHair"
+                      btnRadio="1">Duży zarost</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Okulary: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="glasses" class="btn btn-primary" [(ngModel)]="preferences.glasses"
+                      btnRadio="HasGlasses">Są</button>
+                    <button type="button" name="glasses" class="btn btn-primary" [(ngModel)]="preferences.glasses"
+                      btnRadio="NoGlasses">Brak</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Makijaż: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="makeUp" class="btn btn-primary" [(ngModel)]="preferences.makeUp"
+                      btnRadio="true">Jest</button>
+                    <button type="button" name="makeUp" class="btn btn-primary" [(ngModel)]="preferences.makeUp"
+                      btnRadio="false">Brak</button>
+                  </div>
+                </div>
+                <div class="col mt-2">
+                  <p class="property">Włosy: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="hair" class="btn btn-primary" [(ngModel)]="preferences.hair"
+                      btnRadio="bald">Łyse</button>
+                    <button type="button" name="hair" class="btn btn-primary" [(ngModel)]="preferences.hair"
+                      btnRadio="blond">Blond</button>
+                    <button type="button" name="hair" class="btn btn-primary" [(ngModel)]="preferences.hair"
+                      btnRadio="brown">Brązowe</button>
+                    <button type="button" name="hair" class="btn btn-primary" [(ngModel)]="preferences.hair"
+                      btnRadio="black">Czarne</button>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-5">
+                <h4>Charakter</h4>
+                <div class="col mt-2">
+                  <p class="property">Osobowość: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="personality" class="btn btn-primary"
+                      [(ngModel)]="preferences.personality" btnRadio="spitfire">Choleryk</button>
+                    <button type="button" name="personality" class="btn btn-primary"
+                      [(ngModel)]="preferences.personality" btnRadio="sanguine">Sangwinik</button>
+                    <button type="button" name="personality" class="btn btn-primary"
+                      [(ngModel)]="preferences.personality" btnRadio="melancholy">Melancholik</button>
+                    <button type="button" name="personality" class="btn btn-primary"
+                      [(ngModel)]="preferences.personality" btnRadio="phlegmatic">Flegmatyk</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Nastawienie: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="attitude" class="btn btn-primary" [(ngModel)]="preferences.attitude"
+                      btnRadio="optimist">Optymista</button>
+                    <button type="button" name="attitude" class="btn btn-primary" [(ngModel)]="preferences.attitude"
+                      btnRadio="pesimist">Pesymista</button>
+                    <button type="button" name="attitude" class="btn btn-primary" [(ngModel)]="preferences.attitude"
+                      btnRadio="realist">Realista</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Asertywny: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="assertive" class="btn btn-primary" [(ngModel)]="preferences.assertive"
+                      btnRadio="true">Tak</button>
+                    <button type="button" name="assertive" class="btn btn-primary" [(ngModel)]="preferences.assertive"
+                      btnRadio="false">Nie</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Patriota: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="patriotic" class="btn btn-primary" [(ngModel)]="preferences.patriotic"
+                      btnRadio="true">Tak</button>
+                    <button type="button" name="patriotic" class="btn btn-primary" [(ngModel)]="preferences.patriotic"
+                      btnRadio="false">Nie</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Pewny siebie: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="selfConfident" class="btn btn-primary"
+                      [(ngModel)]="preferences.selfConfident" btnRadio="true">Tak</button>
+                    <button type="button" name="selfConfident" class="btn btn-primary"
+                      [(ngModel)]="preferences.selfConfident" btnRadio="false">Nie</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Z poczuciem humoru: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="withSenseOfHumour" class="btn btn-primary"
+                      [(ngModel)]="preferences.withSenseOfHumour" btnRadio="true">Tak</button>
+                    <button type="button" name="withSenseOfHumour" class="btn btn-primary"
+                      [(ngModel)]="preferences.withSenseOfHumour" btnRadio="false">Nie</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Pracowity: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="hardWorking" class="btn btn-primary"
+                      [(ngModel)]="preferences.hardWorking" btnRadio="true">Tak</button>
+                    <button type="button" name="hardWorking" class="btn btn-primary"
+                      [(ngModel)]="preferences.hardWorking" btnRadio="false">Nie</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Tolerancyjny: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="tolerant" class="btn btn-primary" [(ngModel)]="preferences.tolerant"
+                      btnRadio="true">Tak</button>
+                    <button type="button" name="tolerant" class="btn btn-primary" [(ngModel)]="preferences.tolerant"
+                      btnRadio="false">Nie</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Uprzejmy: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="kind" class="btn btn-primary" [(ngModel)]="preferences.kind"
+                      btnRadio="true">Tak</button>
+                    <button type="button" name="kind" class="btn btn-primary" [(ngModel)]="preferences.kind"
+                      btnRadio="false">Nie</button>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-success mt-1" [disabled]="!preferencesForm.dirty">
+                Zapisz zmiany preferencji
+              </button>
+            </form>
+          </tab>
+
+          <tab heading="Edytuj Charakter">
+            <form #templateForm="ngForm" id="templateForm" (ngSubmit)="updateTemplate()">
+              <div>
+                <h4>Twój charakter</h4>
+                <div class="col mt-2">
+                  <p class="property">Osobowość: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="personality" class="btn btn-primary" [(ngModel)]="template.personality"
+                      btnRadio="spitfire">Choleryk</button>
+                    <button type="button" name="personality" class="btn btn-primary" [(ngModel)]="template.personality"
+                      btnRadio="sanguine">Sangwinik</button>
+                    <button type="button" name="personality" class="btn btn-primary" [(ngModel)]="template.personality"
+                      btnRadio="melancholy">Melancholik</button>
+                    <button type="button" name="personality" class="btn btn-primary" [(ngModel)]="template.personality"
+                      btnRadio="phlegmatic">Flegmatyk</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Nastawienie: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="attitude" class="btn btn-primary" [(ngModel)]="template.attitude"
+                      btnRadio="optimist">Optymista</button>
+                    <button type="button" name="attitude" class="btn btn-primary" [(ngModel)]="template.attitude"
+                      btnRadio="pesimist">Pesymista</button>
+                    <button type="button" name="attitude" class="btn btn-primary" [(ngModel)]="template.attitude"
+                      btnRadio="realist">Realista</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Asertywny: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="assertive" class="btn btn-primary" [(ngModel)]="template.assertive"
+                      btnRadio="true">Tak</button>
+                    <button type="button" name="assertive" class="btn btn-primary" [(ngModel)]="template.assertive"
+                      btnRadio="false">Nie</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Patriota: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="patriotic" class="btn btn-primary" [(ngModel)]="template.patriotic"
+                      btnRadio="true">Tak</button>
+                    <button type="button" name="patriotic" class="btn btn-primary" [(ngModel)]="template.patriotic"
+                      btnRadio="false">Nie</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Pewny siebie: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="selfConfident" class="btn btn-primary"
+                      [(ngModel)]="template.selfConfident" btnRadio="true">Tak</button>
+                    <button type="button" name="selfConfident" class="btn btn-primary"
+                      [(ngModel)]="template.selfConfident" btnRadio="false">Nie</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Z poczuciem humoru: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="withSenseOfHumour" class="btn btn-primary"
+                      [(ngModel)]="template.withSenseOfHumour" btnRadio="true">Tak</button>
+                    <button type="button" name="withSenseOfHumour" class="btn btn-primary"
+                      [(ngModel)]="template.withSenseOfHumour" btnRadio="false">Nie</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Pracowity: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="hardWorking" class="btn btn-primary" [(ngModel)]="template.hardWorking"
+                      btnRadio="true">Tak</button>
+                    <button type="button" name="hardWorking" class="btn btn-primary" [(ngModel)]="template.hardWorking"
+                      btnRadio="false">Nie</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Tolerancyjny: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="tolerant" class="btn btn-primary" [(ngModel)]="template.tolerant"
+                      btnRadio="true">Tak</button>
+                    <button type="button" name="tolerant" class="btn btn-primary" [(ngModel)]="template.tolerant"
+                      btnRadio="false">Nie</button>
+                  </div>
+                </div>
+
+                <div class="col mt-2">
+                  <p class="property">Uprzejmy: </p>
+                  <div class="btn-group d-inline ml-2">
+                    <button type="button" name="kind" class="btn btn-primary" [(ngModel)]="template.kind"
+                      btnRadio="true">Tak</button>
+                    <button type="button" name="kind" class="btn btn-primary" [(ngModel)]="template.kind"
+                      btnRadio="false">Nie</button>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-success mt-1" [disabled]="!templateForm.dirty">
+                Zapisz zmiany charakteru
+              </button>
+            </form>
           </tab>
         </tabset>
       </div>

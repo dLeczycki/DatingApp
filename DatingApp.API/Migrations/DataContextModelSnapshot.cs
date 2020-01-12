@@ -83,6 +83,47 @@ namespace DatingApp.API.Migrations
                     b.ToTable("Photos");
                 });
 
+            modelBuilder.Entity("DatingApp.API.Models.Preferences", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("Assertive");
+
+                    b.Property<string>("Attitude");
+
+                    b.Property<double>("FacialHair");
+
+                    b.Property<string>("Glasses");
+
+                    b.Property<string>("Hair");
+
+                    b.Property<bool>("HardWorking");
+
+                    b.Property<bool>("Kind");
+
+                    b.Property<bool>("MakeUp");
+
+                    b.Property<bool>("Patriotic");
+
+                    b.Property<string>("Personality");
+
+                    b.Property<bool>("SelfConfident");
+
+                    b.Property<bool>("Tolerant");
+
+                    b.Property<int>("UserId");
+
+                    b.Property<bool>("WithSenseOfHumour");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Preferences");
+                });
+
             modelBuilder.Entity("DatingApp.API.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -117,6 +158,47 @@ namespace DatingApp.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("DatingApp.API.Models.UsersTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("Assertive");
+
+                    b.Property<string>("Attitude");
+
+                    b.Property<double>("FacialHair");
+
+                    b.Property<string>("Glasses");
+
+                    b.Property<string>("Hair");
+
+                    b.Property<bool>("HardWorking");
+
+                    b.Property<bool>("Kind");
+
+                    b.Property<bool>("MakeUp");
+
+                    b.Property<bool>("Patriotic");
+
+                    b.Property<string>("Personality");
+
+                    b.Property<bool>("SelfConfident");
+
+                    b.Property<bool>("Tolerant");
+
+                    b.Property<int>("UserId");
+
+                    b.Property<bool>("WithSenseOfHumour");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UsersTemplates");
                 });
 
             modelBuilder.Entity("DatingApp.API.Models.Value", b =>
@@ -162,6 +244,22 @@ namespace DatingApp.API.Migrations
                     b.HasOne("DatingApp.API.Models.User", "User")
                         .WithMany("Photos")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("DatingApp.API.Models.Preferences", b =>
+                {
+                    b.HasOne("DatingApp.API.Models.User", "User")
+                        .WithOne("Preferences")
+                        .HasForeignKey("DatingApp.API.Models.Preferences", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("DatingApp.API.Models.UsersTemplate", b =>
+                {
+                    b.HasOne("DatingApp.API.Models.User", "User")
+                        .WithOne("UsersTemplate")
+                        .HasForeignKey("DatingApp.API.Models.UsersTemplate", "UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618

@@ -59,6 +59,7 @@ namespace DatingApp.API.Controllers
             return Ok(userToReturn);
         }
 
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, UserForUpdateDto userForUpdateDto)
         {
@@ -72,7 +73,89 @@ namespace DatingApp.API.Controllers
             if (await _repo.SaveAll())
                 return NoContent();
 
-            throw new Exception($"Updating user {id} failed on save");
+            throw new Exception($"Aktualizacja użytkownika {id} się nie powiodła");
+        }
+
+        [HttpGet("{id}/preferences")]
+        public async Task<IActionResult> GetUsersPreferences(int id)
+        {
+            if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+
+            var preferencesFromRepo = await _repo.GetUsersPreferences(id);
+
+            if (preferencesFromRepo == null) return BadRequest("Użytkownik nie ma ustawionych preferencji");
+
+            var preferencesToReturn = _mapper.Map<PreferencesForUpdateDto>(preferencesFromRepo);
+
+            return Ok(preferencesToReturn);
+        }
+
+        [HttpGet("{id}/template")]
+        public async Task<IActionResult> GetUsersTemplate(int id)
+        {
+            if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+
+            var templateFromRepo = await _repo.GetUsersTemplate(id);
+
+            if (templateFromRepo == null) return BadRequest("Użytkownik nie ma ustawionych cech");
+
+            var templateToReturn = _mapper.Map<UsersTemplateForUpdateDto>(templateFromRepo);
+
+            return Ok(templateToReturn);
+        }
+
+        [HttpPut("{id}/preferences")]
+        public async Task<IActionResult> UpdateUsersPreferences(int id, PreferencesForUpdateDto preferenceForUpdateDto)
+        {
+            if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+
+            var preferencesFromRepo = await _repo.GetUsersPreferences(id);
+
+            if (preferencesFromRepo != null)
+            {
+                preferencesFromRepo = _mapper.Map(preferenceForUpdateDto, preferencesFromRepo);
+            }
+            else
+            {
+                preferencesFromRepo = new Preferences();
+                preferencesFromRepo = _mapper.Map(preferenceForUpdateDto, preferencesFromRepo);
+                preferencesFromRepo.UserId = id;
+                _repo.Add(preferencesFromRepo);
+            }
+
+            if (await _repo.SaveAll())
+                return Ok();
+
+            throw new Exception($"Aktualizacja preferencji się nie powiodła");
+        }
+
+        [HttpPut("{id}/template")]
+        public async Task<IActionResult> UpdateUsersTemplate(int id, UsersTemplateForUpdateDto usersTemplateForUpdateDto)
+        {
+            if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+
+            var usersTemplateFromRepo = await _repo.GetUsersTemplate(id);
+
+            if (usersTemplateFromRepo != null)
+            {
+                usersTemplateFromRepo = _mapper.Map(usersTemplateForUpdateDto, usersTemplateFromRepo);
+            }
+            else
+            {
+                usersTemplateFromRepo = new UsersTemplate();
+                usersTemplateFromRepo = _mapper.Map(usersTemplateForUpdateDto, usersTemplateFromRepo);
+                usersTemplateFromRepo.UserId = id;
+                _repo.Add(usersTemplateFromRepo);
+            }
+
+            if (await _repo.SaveAll())
+                return Ok();
+
+            throw new Exception($"Aktualizacja cech się nie powiodła");
         }
 
         [HttpPost("{id}/like/{recipientId}")]
@@ -84,7 +167,7 @@ namespace DatingApp.API.Controllers
             var like = await _repo.GetLike(id, recipientId);
 
             if (like != null)
-                return BadRequest("You already like this user");
+                return BadRequest("Już lubisz tego użytkownika");
 
             if (await _repo.GetUser(recipientId) == null)
                 return NotFound();
@@ -100,7 +183,7 @@ namespace DatingApp.API.Controllers
             if (await _repo.SaveAll())
                 return Ok();
 
-            return BadRequest("Failed to like user");
+            return BadRequest("Nie udało się polubić użytkownika");
         }
     }
 }

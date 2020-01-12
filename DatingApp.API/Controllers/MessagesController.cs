@@ -87,7 +87,7 @@ namespace DatingApp.API.Controllers
             var recipient = await _repo.GetUser(messageForCreationDto.RecipientId);
 
             if (recipient == null)
-                return BadRequest("Could not find user");
+                return BadRequest("Nie można odnaleźć użytkownika");
 
             var message = _mapper.Map<Message>(messageForCreationDto);
 
@@ -99,7 +99,7 @@ namespace DatingApp.API.Controllers
                 return CreatedAtRoute("GetMessage", new { id = message.Id }, messageToReturn);
             }
 
-            throw new Exception("Creating the message failed on save");
+            throw new Exception("Nie udało się utworzyć wiadomości");
         }
 
         [HttpPost("{id}")]
@@ -122,7 +122,7 @@ namespace DatingApp.API.Controllers
             if (await _repo.SaveAll())
                 return NoContent();
 
-            throw new Exception("Error deleting the message");
+            throw new Exception("Wystąpił błąd podczas usuwania wiadomości");
         }
 
         [HttpPost("{id}/read")]

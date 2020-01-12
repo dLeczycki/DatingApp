@@ -46,6 +46,8 @@ namespace DatingApp.API.Data
 
             user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
+            user.Preferences = new Preferences();
+            user.UsersTemplate = new UsersTemplate();
 
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();

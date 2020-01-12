@@ -6,6 +6,7 @@ import { User } from '../_models/user';
 import { PaginatedResult } from '../_models/pagination';
 import { map } from 'rxjs/operators';
 import { Message } from '../_models/message';
+import { Template } from '../_models/template';
 
 @Injectable({
   providedIn: 'root'
@@ -103,6 +104,25 @@ export class UserService {
 
   sendMessage(id: number, message: Message) {
     return this.http.post(this.baseUrl + 'users/' + id + '/messages', message);
+  }
+
+  getUsersPreferences(id: number) {
+    return this.http.get<Template>(this.baseUrl + 'users/' + id + '/preferences').pipe(map(response => {
+      return response;
+    }));
+  }
+  getUsersTemplate(id: number) {
+    return this.http.get<Template>(this.baseUrl + 'users/' + id + '/template').pipe(map(response => {
+      return response;
+    }));
+  }
+
+  setPreferences(id: number, preferences) {
+    return this.http.put(this.baseUrl + 'users/' + id + '/preferences', preferences)
+  }
+
+  setTemplate(id: number, template: Template) {
+    return this.http.put(this.baseUrl + 'users/' + id + '/template', template)
   }
 
   deleteMessage(id: number, userId: number) {

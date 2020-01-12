@@ -43,14 +43,19 @@ namespace DatingApp.API.Data
 
         public async Task<User> GetUser(int id)
         {
-            var user = await _context.Users.Include(p => p.Photos).FirstOrDefaultAsync(u => u.Id == id);
+            var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == id);
 
             return user;
         }
 
         public async Task<PagedList<User>> GetUsers(UserParams userParams)
         {
-            var users = _context.Users.Include(p => p.Photos).OrderByDescending(u => u.LastActive).AsQueryable();
+            var users = _context.Users.Include(u => u.Photos).Include(u => u.UsersTemplate).Include(u => u.Preferences)
+            .OrderByDescending(u => u.LastActive)
+            .AsQueryable();
+
+            var preferences = await _context.Preferences.Where(p => p.UserId == userParams.UserId).FirstOrDefaultAsync();
 
             //Filters for get users
             users = users.Where(u => u.Id != userParams.UserId);
@@ -84,19 +89,49 @@ namespace DatingApp.API.Data
                     case "created":
                         users = users.OrderByDescending(u => u.Created);
                         break;
+                    case "preferences":
+                        //Z tą pierwszą metodą jest coś nie tak
+                        List<UserToSort> usersToSort = new List<UserToSort>();
+                        UserToSort userToSort;
+                        foreach (var user in users)
+                        {
+                            userToSort = new UserToSort
+                            {
+                                User = user,
+                                Accuracy = CountAccuracy(user.UsersTemplate, preferences)
+                            };
+                            usersToSort.Add(userToSort);
+                        }
+                        usersToSort = usersToSort.OrderByDescending(u => u.Accuracy).ToList();
+                        users = usersToSort.Select(u => u.User).AsQueryable();
+                        break;
+                    case "appearance":
+                        List<UserToSort> usersToSortForAppearance = new List<UserToSort>();
+                        UserToSort userToSortForAppearance;
+                        foreach (var user in users)
+                        {
+                            userToSort = new UserToSort
+                            {
+                                User = user,
+                                Accuracy = CountAccuracyForAppearance(user.UsersTemplate, preferences)
+                            };
+                            usersToSortForAppearance.Add(userToSort);
+                        }
+                        usersToSort = usersToSortForAppearance.OrderByDescending(u => u.Accuracy).ToList();
+                        users = usersToSort.Select(u => u.User).AsQueryable();
+                        break;
                     default:
                         users = users.OrderByDescending(u => u.LastActive);
                         break;
                 }
             }
 
-            return await PagedList<User>.CreateAsync(users, userParams.PageNumber, userParams.PageSize);
+            return PagedList<User>.Create(users.ToList(), userParams.PageNumber, userParams.PageSize);
         }
 
         private async Task<IEnumerable<int>> GetUserLikes(int id, bool likers)
         {
-            var user = await _context.Users.Include(x => x.Likers)
-                .Include(x => x.Likees).FirstOrDefaultAsync(u => u.Id == id);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
 
             if (likers)
             {
@@ -118,11 +153,19 @@ namespace DatingApp.API.Data
             return await _context.Messages.FirstOrDefaultAsync(m => m.Id == id);
         }
 
+        public async Task<UsersTemplate> GetUsersTemplate(int userId)
+        {
+            return await _context.UsersTemplates.FirstOrDefaultAsync(t => t.UserId == userId);
+        }
+
+        public async Task<Preferences> GetUsersPreferences(int userId)
+        {
+            return await _context.Preferences.FirstOrDefaultAsync(p => p.UserId == userId);
+        }
+
         public async Task<PagedList<Message>> GetMessagesForUser(MessageParams messageParams)
         {
             var messages = _context.Messages
-                .Include(u => u.Sender).ThenInclude(p => p.Photos)
-                .Include(u => u.Recipient).ThenInclude(p => p.Photos)
                 .AsQueryable();
 
             switch (messageParams.MessageContainer)
@@ -139,20 +182,76 @@ namespace DatingApp.API.Data
             }
 
             messages = messages.OrderByDescending(d => d.MessageSent);
-            return await PagedList<Message>.CreateAsync(messages, messageParams.PageNumber, messageParams.PageSize);
+            return PagedList<Message>.Create(messages.ToList(), messageParams.PageNumber, messageParams.PageSize);
         }
 
         public async Task<IEnumerable<Message>> GetMessageThread(int userId, int recipientId)
         {
             var messages = await _context.Messages
-                .Include(u => u.Sender).ThenInclude(p => p.Photos)
-                .Include(u => u.Recipient).ThenInclude(p => p.Photos)
                 .Where(m => m.RecipientId == userId && m.RecipientDeleted == false && m.SenderId == recipientId
                     || m.RecipientId == recipientId && m.SenderDeleted == false && m.SenderId == userId)
                 .OrderByDescending(m => m.MessageSent)
                 .ToListAsync();
 
             return messages;
+        }
+
+        private double CountAccuracy(UsersTemplate template, Preferences preferences)
+        {
+            double accuracy = 0;
+            if (template != null)
+            {
+                List<double> equasionValues = new List<double>();
+                if (template.FacialHair == preferences.FacialHair) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.Glasses == preferences.Glasses) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.MakeUp == preferences.MakeUp) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.Hair == preferences.Hair) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.Personality == preferences.Personality) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.Attitude == preferences.Attitude) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.Assertive == preferences.Assertive) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.Patriotic == preferences.Patriotic) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.SelfConfident == preferences.SelfConfident) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.WithSenseOfHumour == preferences.WithSenseOfHumour) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.HardWorking == preferences.HardWorking) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.Tolerant == preferences.Tolerant) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.Kind == preferences.Kind) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                accuracy = equasionValues.Average();
+            }
+            return accuracy;
+        }
+
+        private double CountAccuracyForAppearance(UsersTemplate template, Preferences preferences)
+        {
+            double accuracy = 0;
+            if (template != null)
+            {
+                List<double> equasionValues = new List<double>();
+                if (template.FacialHair == preferences.FacialHair) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.Glasses == preferences.Glasses) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.MakeUp == preferences.MakeUp) equasionValues.Add(1);
+                else equasionValues.Add(0);
+                if (template.Hair == preferences.Hair) equasionValues.Add(1);
+                else equasionValues.Add(0);
+
+                accuracy = equasionValues.Average();
+            }
+
+            return accuracy;
         }
     }
 }

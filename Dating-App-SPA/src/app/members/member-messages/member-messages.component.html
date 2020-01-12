@@ -1,7 +1,7 @@
 <div class="card">
   <div class="card-body">
     <div *ngIf="messages?.length===0">
-      <p>No mesages yet... say hi by using the message box below</p>
+      <p>Jeszcze nie wymienialiście ze sobą wiadomości.. Przywitaj się wykorzystując pole poniżej</p>
     </div>
 
     <ul class="chat">
@@ -15,7 +15,7 @@
             <div class="header">
               <strong class="primary-font">{{message.senderKnownAs}}</strong>
               <small class="text-muted float-right">
-                <span class="fa fa-clock-o">{{message.messageSent | timeAgo}}</span>
+                <span><i class="fa fa-clock-o mr-1"></i>{{message.messageSent | timeAgo}}</span>
               </small>
             </div>
             <p>{{message.content}}</p>
@@ -30,9 +30,9 @@
           <div class="chat-body">
             <div class="header">
               <small class="text-muted">
-                <span class="fa fa-clock-o">{{message.messageSent | timeAgo}}</span>
-                <span *ngIf="!message.isRead" class="text-danger">(unread)</span>
-                <span *ngIf="message.isRead" class="text-success">(Read {{message.dateRead | timeAgo}})</span>
+                <span><i class="fa fa-clock-o mr-1"></i>{{message.messageSent | timeAgo}}</span>
+                <span *ngIf="!message.isRead" class="text-danger ml-2">(Nie przeczytano)</span>
+                <span *ngIf="message.isRead" class="text-success">(Wyświetlono {{message.dateRead | timeAgo}})</span>
 
               </small>
               <strong class="primary-font float-right">{{message.senderKnownAs}}</strong>
@@ -48,9 +48,9 @@
     <form #messageForm="ngForm" (ngSubmit)="messageForm.valid && sendMessage()">
       <div class="input-group">
         <input type="text" [(ngModel)]="newMessage.content" name="content" required class="form-control input-sm"
-          placeholder="send a private message">
+          placeholder="Wyślij prywatną wiadomość">
         <div class="input-group-append">
-          <button class="btn btn-primary" [disabled]="!messageForm.valid">Send</button>
+          <button class="btn btn-primary" [disabled]="!messageForm.valid">Wyślij</button>
         </div>
       </div>
     </form>

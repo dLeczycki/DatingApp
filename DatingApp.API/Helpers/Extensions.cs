@@ -1,4 +1,5 @@
 using System;
+using DatingApp.API.DTOs;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -30,6 +31,42 @@ namespace DatingApp.API.Helpers
                 age--;
 
             return age;
+        }
+
+        public static double CalculateFacialHair(this FacialHair facialHair)
+        {
+            double hair = (facialHair.Beard + facialHair.Moustache + facialHair.Sideburns) / 3;
+            if (hair == 0) return 0;
+            else if (hair < 0.5) return 0.5;
+            else return 1;
+        }
+
+        public static string SetHair(this Hair hair)
+        {
+            string recognizedHair = "bald";
+            double confidence = hair.Bald;
+            foreach (var type in hair.HairColor)
+            {
+                if (type.Confidence > confidence)
+                {
+                    recognizedHair = type.Color;
+                    confidence = type.Confidence;
+                }
+            }
+
+            return recognizedHair;
+        }
+
+        public static string SetGlasses(this FaceAttributes attributes)
+        {
+            if (attributes.Glasses != "NoGlasses") return "HasGlasses";
+            else return "NoGlasses";
+        }
+
+        public static bool SetMakeUp(this MakeUp makeUp)
+        {
+            if (makeUp.EyeMakeup || makeUp.LipMakeup) return true;
+            else return false;
         }
     }
 }

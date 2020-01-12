@@ -28,6 +28,13 @@ namespace DatingApp.API.Helpers
             CreateMap<Message, MessageToReturnDto>()
                 .ForMember(m => m.SenderPhotoUrl, opt => opt.MapFrom(u => u.Sender.Photos.FirstOrDefault(p => p.IsMain).Url))
                 .ForMember(m => m.RecipientPhotoUrl, opt => opt.MapFrom(u => u.Recipient.Photos.FirstOrDefault(p => p.IsMain).Url));
+            CreateMap<FaceDto, FaceForTemplateDto>()
+                .ForMember(dest => dest.FacialHair, opt => opt.MapFrom(src => src.FaceAttributes.FacialHair.CalculateFacialHair()))
+                .ForMember(dest => dest.Hair, opt => opt.MapFrom(src => src.FaceAttributes.Hair.SetHair()))
+                .ForMember(dest => dest.Glasses, opt => opt.MapFrom(src => src.FaceAttributes.SetGlasses()))
+                .ForMember(dest => dest.MakeUp, opt => opt.MapFrom(src => src.FaceAttributes.MakeUp.SetMakeUp()));
+            CreateMap<PreferencesForUpdateDto, Preferences>().ReverseMap();
+            CreateMap<UsersTemplateForUpdateDto, UsersTemplate>().ReverseMap();
         }
 
     }

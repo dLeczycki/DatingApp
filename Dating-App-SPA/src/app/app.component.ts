@@ -24,5 +24,5 @@ export class AppComponent implements OnInit {
       this.authService.changeMemberPhoto(user.photoUrl);
     }
   }
-  title = 'Dating-App-SPA';
+  title = 'Finders';
 }

@@ -9,6 +9,7 @@ import {
   NgxGalleryAnimation
 } from 'ngx-gallery';
 import { TabsetComponent } from 'ngx-bootstrap';
+import { AuthService } from 'src/app/_services/auth.service';
 
 @Component({
   selector: 'app-member-detail',
@@ -23,6 +24,7 @@ export class MemberDetailComponent implements OnInit {
 
   constructor(
     private userService: UserService,
+    private authService: AuthService,
     private alertify: AlertifyService,
     private route: ActivatedRoute
   ) { }
@@ -65,5 +67,13 @@ export class MemberDetailComponent implements OnInit {
 
   selectTab(tabId: number) {
     this.memberTabs.tabs[tabId].active = true;
+  }
+
+  like() {
+    this.userService.sendLike(this.authService.decodedToken.nameid, this.user.id).subscribe(data => {
+      this.alertify.success('Polubiłeś: ' + this.user.knownAs);
+    }, error => {
+      this.alertify.error(error);
+    })
   }
 }

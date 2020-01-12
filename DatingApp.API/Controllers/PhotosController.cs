@@ -1,7 +1,12 @@
 
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using CloudinaryDotNet;
@@ -13,7 +18,7 @@ using DatingApp.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-
+using Newtonsoft.Json;
 
 namespace DatingApp.API.Controllers
 {
@@ -84,7 +89,34 @@ namespace DatingApp.API.Controllers
 
             var photo = _mapper.Map<Photo>(photoForCreationDto);
 
-            if (!userFromRepo.Photos.Any(u => u.IsMain)) photo.IsMain = true;
+            if (!userFromRepo.Photos.Any(u => u.IsMain))
+            {
+                photo.IsMain = true;
+                FaceDto assetsFromPhoto;
+                using (var faceClient = new HttpClient())
+                {
+                    Uri uri = new Uri("https://face-finders.cognitiveservices.azure.com/face/v1.0/detect?returnFaceId=false&returnFaceAttributes=facialHair,glasses,hair,makeup");
+                    var photoParameter = "{\"url\": \"" + photo.Url + "\"}";
+                    HttpContent content = new StringContent(photoParameter, Encoding.UTF8, "application/json");
+                    content.Headers.Add("Ocp-Apim-Subscription-Key", "a18f920438d74a0fa740f4532d342fb4");
+                    faceClient.DefaultRequestHeaders.Add("Host", "face-finders.cognitiveservices.azure.com");
+
+                    HttpResponseMessage response = await faceClient.PostAsync(uri, content);
+
+                    string body = await response.Content.ReadAsStringAsync();
+                    List<FaceDto> facesDto = JsonConvert.DeserializeObject<List<FaceDto>>(body);
+                    assetsFromPhoto = facesDto[0];
+                }
+
+                var templateFromRepo = await _repo.GetUsersTemplate(userId);
+
+                var template = _mapper.Map<FaceForTemplateDto>(assetsFromPhoto);
+
+                templateFromRepo.FacialHair = template.FacialHair;
+                templateFromRepo.Glasses = template.Glasses;
+                templateFromRepo.MakeUp = template.MakeUp;
+                templateFromRepo.Hair = template.Hair;
+            }
 
             userFromRepo.Photos.Add(photo);
 
@@ -95,7 +127,7 @@ namespace DatingApp.API.Controllers
                 return CreatedAtRoute("GetPhoto", new { id = photo.Id }, photoToReturn);
             }
 
-            return BadRequest("Could not add the photo");
+            return BadRequest("Nie udało się dodać zdjęcia");
         }
 
         [HttpPost("{id}/setMain")]
@@ -110,15 +142,41 @@ namespace DatingApp.API.Controllers
 
             var photoFromRepo = await _repo.GetPhoto(id);
 
-            if (photoFromRepo.IsMain) return BadRequest("This is aready the main photo");
+            if (photoFromRepo.IsMain) return BadRequest("To zdjęcie jest już ustawione jako główne");
 
             var currentMainPhoto = await _repo.GetMainPhotoForUser(userId);
             currentMainPhoto.IsMain = false;
 
             photoFromRepo.IsMain = true;
 
+            FaceDto assetsFromPhoto;
+
+            using (var faceClient = new HttpClient())
+            {
+                Uri uri = new Uri("https://face-finders.cognitiveservices.azure.com/face/v1.0/detect?returnFaceId=false&returnFaceAttributes=facialHair,glasses,hair,makeup");
+                var photoParameter = "{\"url\": \"" + photoFromRepo.Url + "\"}";
+                HttpContent content = new StringContent(photoParameter, Encoding.UTF8, "application/json");
+                content.Headers.Add("Ocp-Apim-Subscription-Key", "a18f920438d74a0fa740f4532d342fb4");
+                faceClient.DefaultRequestHeaders.Add("Host", "face-finders.cognitiveservices.azure.com");
+
+                HttpResponseMessage response = await faceClient.PostAsync(uri, content);
+
+                string body = await response.Content.ReadAsStringAsync();
+                List<FaceDto> facesDto = JsonConvert.DeserializeObject<List<FaceDto>>(body);
+                assetsFromPhoto = facesDto[0];
+            }
+
+            var templateFromRepo = await _repo.GetUsersTemplate(userId);
+
+            var template = _mapper.Map<FaceForTemplateDto>(assetsFromPhoto);
+
+            templateFromRepo.FacialHair = template.FacialHair;
+            templateFromRepo.Glasses = template.Glasses;
+            templateFromRepo.MakeUp = template.MakeUp;
+            templateFromRepo.Hair = template.Hair;
+
             if (await _repo.SaveAll()) return NoContent();
-            return BadRequest("Could not set photo to main");
+            return BadRequest("Nie można ustawić zdjęcia jako główne");
         }
 
         [HttpDelete("{id}")]
@@ -133,7 +191,7 @@ namespace DatingApp.API.Controllers
 
             var photoFromRepo = await _repo.GetPhoto(id);
 
-            if (photoFromRepo.IsMain) return BadRequest("Cannot delete your main photo");
+            if (photoFromRepo.IsMain) return BadRequest("Nie możesz usunąć głównego zdjęcia");
 
             if (photoFromRepo.PublicId != null)
             {
@@ -152,7 +210,7 @@ namespace DatingApp.API.Controllers
 
             if (await _repo.SaveAll()) return Ok();
 
-            return BadRequest("Failed to delete the photo");
+            return BadRequest("Nie udało sie usunąć zdjęcia");
         }
 
     }

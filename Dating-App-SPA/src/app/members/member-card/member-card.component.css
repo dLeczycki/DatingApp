@@ -25,7 +25,7 @@
 
 .card-img-wrapper:hover .member-icons {
   opacity: 1;
-  bottom: 0;
+  bottom: 5%;
 }
 
 .animate {
